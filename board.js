@@ -30,6 +30,11 @@ function place(index) {
         return;
     }
 
+    if(board[index] == ai || board[index] == human){
+        alert('Cannot place this position');
+        return;
+    }
+
     board[index] = currentTurn;
 
     var data = '<h3>' + currentTurn + '</h3>';
@@ -74,7 +79,6 @@ function minimax(tmpBoard, player) {
     callCount++;
     var availableMoves = getAvailableMove(tmpBoard);
 
-    // checks for the terminal states such as win, lose, and tie and returning a value accordingly
     if (winning(tmpBoard, human)) {
         return {
             score: -10
@@ -89,19 +93,14 @@ function minimax(tmpBoard, player) {
         };
     }
 
-    // an array to collect all the objects
     var moves = [];
 
-    // loop through available spots
     for (var i = 0; i < availableMoves.length; i++) {
-        //create an object for each and store the index of that spot that was stored as a number in the object's index key
         var move = {};
-        move.index = tmpBoard[availableMoves[i]];
+        move.index = availableMoves[i];
 
-        // set the empty spot to the current player
-        tmpBoard[availableMoves[i]] = player;
+       tmpBoard[move.index ] = player;
 
-        //if collect the score resulted from calling minimax on the opponent of the current player
         if (player == ai) {
             var result = minimax(tmpBoard, human);
             move.score = result.score;
@@ -110,15 +109,12 @@ function minimax(tmpBoard, player) {
             move.score = result.score;
         }
 
-        //reset the spot to empty
-        tmpBoard[availableMoves[i]] = move.index;
+        tmpBoard[move.index] = move.index;
 
-        // push the object to the array
         moves.push(move);
     }
 
-    // if it is the computer's turn loop over the moves and choose the move with the highest score
-    var bestMove;
+     var bestMove;
     if (player === ai) {
         var bestScore = -10000;
         for (var i = 0; i < moves.length; i++) {
@@ -128,9 +124,7 @@ function minimax(tmpBoard, player) {
             }
         }
     } else {
-
-        // else loop over the moves and choose the move with the lowest score
-        var bestScore = 10000;
+ var bestScore = 10000;
         for (var i = 0; i < moves.length; i++) {
             if (moves[i].score < bestScore) {
                 bestScore = moves[i].score;
@@ -139,7 +133,6 @@ function minimax(tmpBoard, player) {
         }
     }
 
-    // return the chosen move (object) from the array to the higher depth
     return moves[bestMove];
 
 
