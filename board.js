@@ -25,12 +25,12 @@ function renderBoard() {
 
 function place(index) {
 
-    if(isOver()){
+    if (isOver()) {
         alert('Game over');
         return;
     }
 
-    if(board[index] == ai || board[index] == human){
+    if (board[index] == ai || board[index] == human) {
         alert('Cannot place this position');
         return;
     }
@@ -40,36 +40,39 @@ function place(index) {
     var data = '<h3>' + currentTurn + '</h3>';
     document.getElementById(index).innerHTML = data;
 
-    setTimeout(function(){
-        if(winning(board, currentTurn)){
+    setTimeout(function () {
+        if (winning(board, currentTurn)) {
             alert(currentTurn + ' is win');
-        }else {
-            changeTurn();   
+        } else {
+            changeTurn();
         }
     }, 100);
 }
 
-function isOver(){
+function isOver() {
     return winning(board, ai) || winning(board, human) || getAvailableMove(board).length == 0;
 }
 
 function changeTurn() {
     currentTurn = currentTurn == ai ? human : ai;
-    console.log('turn :' + currentTurn);
 
     if (currentTurn == ai) {
         console.log('computer move');
-        var bestAiMove = minimax(cloneBoard(board), ai);
-        console.log(board);
-        console.log(bestAiMove);
 
+        var a = performance.now();
+        var bestAiMove = minimax(cloneBoard(board), ai);
+        var b = performance.now();
+        //console.log(board);
+        //console.log(bestAiMove);
+        console.log('process time = ' + (b - a) + ' ms');
         place(bestAiMove.index);
+        callCount = 0;
     }
 }
 
-function cloneBoard(){
+function cloneBoard() {
     var tmpBoard = [];
-    for(var i = 0; i < board.length; i++){
+    for (var i = 0; i < board.length; i++) {
         tmpBoard[i] = board[i];
     }
     return tmpBoard;
@@ -78,63 +81,70 @@ function cloneBoard(){
 function minimax(tmpBoard, player) {
     callCount++;
     var availableMoves = getAvailableMove(tmpBoard);
-
+    //console.log(tmpBoard);
     if (winning(tmpBoard, human)) {
+        //console.log('human win');
+
         return {
             score: -10
         };
     } else if (winning(tmpBoard, ai)) {
+        //console.log('ai win');
         return {
             score: 10
         };
     } else if (availableMoves.length === 0) {
+        //console.log('end game');
         return {
             score: 0
         };
-    }
-
-    var moves = [];
-
-    for (var i = 0; i < availableMoves.length; i++) {
-        var move = {};
-        move.index = availableMoves[i];
-
-       tmpBoard[move.index ] = player;
-
-        if (player == ai) {
-            var result = minimax(tmpBoard, human);
-            move.score = result.score;
-        } else {
-            var result = minimax(tmpBoard, ai);
-            move.score = result.score;
-        }
-
-        tmpBoard[move.index] = move.index;
-
-        moves.push(move);
-    }
-
-     var bestMove;
-    if (player === ai) {
-        var bestScore = -10000;
-        for (var i = 0; i < moves.length; i++) {
-            if (moves[i].score > bestScore) {
-                bestScore = moves[i].score;
-                bestMove = i;
-            }
-        }
     } else {
- var bestScore = 10000;
-        for (var i = 0; i < moves.length; i++) {
-            if (moves[i].score < bestScore) {
-                bestScore = moves[i].score;
-                bestMove = i;
+        var moves = [];
+
+        for (var i = 0; i < availableMoves.length; i++) {
+            var move = {};
+            move.index = availableMoves[i];
+
+            tmpBoard[move.index] = player;
+
+            if (player == ai) {
+                var result = minimax(tmpBoard, human);
+                move.score = result.score;
+            } else {
+                var result = minimax(tmpBoard, ai);
+                move.score = result.score;
+            }
+
+            tmpBoard[move.index] = move.index;
+
+            moves.push(move);
+        }
+
+        //console.log('-------------- find minimax for ' + player + ' -------------');
+
+        //console.log(moves);
+        //console.log(tmpBoard)
+
+        var bestMove;
+        if (player === ai) {
+            var bestScore = -10000;
+            for (var i = 0; i < moves.length; i++) {
+                if (moves[i].score > bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        } else {
+            var bestScore = 10000;
+            for (var i = 0; i < moves.length; i++) {
+                if (moves[i].score < bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
             }
         }
+        return moves[bestMove];
     }
-
-    return moves[bestMove];
-
 
 }
 
